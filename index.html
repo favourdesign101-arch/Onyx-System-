@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ONYX Systems | Precision Metabolic Telemetry</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: {
+              DEFAULT: '#090A0F',
+              50: '#1E2233',
+              100: '#181B29',
+              200: '#141622',
+              300: '#12141D', // Card surface
+              400: '#0E1017',
+              500: '#090A0F', // Canvas background
+            },
+            gold: {
+              DEFAULT: '#F59E0B',
+              50: '#FFFBEB',
+              100: '#FEF3C7',
+              200: '#FDE68A',
+              300: '#FCD34D',
+              400: '#FBBF24',
+              500: '#F59E0B',
+              600: '#D97706',
+              700: '#B45309',
+              accent: '#F59E0B',
+              bright: '#FBBF24',
+              light: '#FDE68A',
+              metallic: '#D97706',
+              glow: 'rgba(245, 158, 11, 0.45)',
+              dim: 'rgba(245, 158, 11, 0.12)',
+            },
+            cyan: {
+              accent: '#F59E0B',
+              glow: 'rgba(245, 158, 11, 0.45)',
+              dim: 'rgba(245, 158, 11, 0.12)',
+            },
+            blue: {
+              electric: '#D97706',
+              glow: 'rgba(217, 119, 6, 0.4)',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          boxShadow: {
+            'gold-glow': '0 0 25px -4px rgba(245, 158, 11, 0.45)',
+            'gold-sm': '0 0 12px -2px rgba(245, 158, 11, 0.45)',
+            'cyan-glow': '0 0 25px -4px rgba(245, 158, 11, 0.45)',
+            'cyan-sm': '0 0 12px -2px rgba(245, 158, 11, 0.45)',
+            'blue-glow': '0 0 25px -4px rgba(217, 119, 6, 0.35)',
+            'inner-glow': 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.1)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom High-Tech Styling */
+    body {
+      background-color: #090A0F;
+      color: #FFFFFF;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Subtle grid background */
+    .bg-grid-pattern {
+      background-size: 36px 36px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+
+    .telemetry-glow-cyan {
+      box-shadow: 0 0 35px -5px rgba(245, 158, 11, 0.3);
+    }
+
+    /* Custom range slider styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: #181B29;
+      height: 6px;
+      border-radius: 9999px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #F59E0B;
+      cursor: pointer;
+      box-shadow: 0 0 12px #F59E0B;
+      border: 2px solid #090A0F;
+      transition: transform 0.15s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    /* Pulsing radar dot */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.4); opacity: 0; }
+      100% { transform: scale(0.95); opacity: 0; }
+    }
+    .radar-pulse {
+      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+
+    /* Smooth scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090A0F;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E2233;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #F59E0B;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-obsidian-500 text-white selection:bg-cyan-accent selection:text-obsidian bg-grid-pattern relative">
+
+  <!-- Ambient Light Accents -->
+  <div class="fixed top-0 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none -z-10 transform -translate-y-1/2"></div>
+  <div class="fixed top-1/3 right-10 w-96 h-96 bg-amber-600/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-10 left-1/3 w-80 h-80 bg-amber-400/5 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- Navigation Header -->
+  <header class="sticky top-0 z-40 backdrop-blur-xl bg-obsidian-500/80 border-b border-white/5 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-full bg-obsidian-300 border border-amber-500/50 flex items-center justify-center relative group-hover:border-amber-400 transition-all shadow-[0_0_15px_rgba(245,158,11,0.35)] overflow-hidden p-0.5">
+          <img src="file_00000000eeac82108895630939aa4dfe.png" onerror="this.onerror=null; this.src='img_onyx_gold_logo.jpg';" alt="ONYX Systems Logo" class="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform" />
+          <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-obsidian-500"></span>
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center space-x-1.5">
+            <span class="font-extrabold tracking-wider text-base text-white">ONYX</span>
+            <span class="font-mono text-xs text-amber-400 uppercase tracking-widest px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded">SYS</span>
+          </div>
+          <span class="text-[10px] text-amber-200/70 font-mono tracking-tight hidden sm:block">METABOLIC TELEMETRY</span>
+        </div>
+      </a>
+
+      <!-- Live Heartbeat Indicator (Center desktop) -->
+      <div class="hidden md:flex items-center space-x-2 px-3 py-1 rounded-full bg-obsidian-300/80 border border-white/10 text-xs font-mono">
+        <span class="relative flex h-2 w-2">
+          <span class="radar-pulse absolute inline-flex h-full w-full rounded-full bg-cyan-accent opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-accent"></span>
+        </span>
+        <span class="text-gray-300">TELEMETRY ENGINE:</span>
+        <span class="text-cyan-accent font-semibold">ACTIVE (v4.8)</span>
+      </div>
+
+      <!-- Action Nav -->
+      <div class="flex items-center space-x-3 sm:space-x-4">
+        <a href="#simulator" class="text-xs sm:text-sm text-gray-300 hover:text-cyan-accent transition font-medium hidden sm:inline-block">
+          Live Simulator
+        </a>
+        <a href="#offerings" class="text-xs sm:text-sm text-gray-300 hover:text-cyan-accent transition font-medium hidden sm:inline-block">
+          Offerings
+        </a>
+        <button onclick="openCommunityModal()" class="text-xs sm:text-sm px-3.5 py-2 rounded-lg bg-obsidian-300 hover:bg-obsidian-100 border border-white/10 text-white font-semibold transition flex items-center space-x-1.5">
+          <i data-lucide="users" class="w-3.5 h-3.5 text-cyan-accent"></i>
+          <span>Free Hub</span>
+        </button>
+        <a href="#audit-intake" class="text-xs sm:text-sm px-4 py-2 rounded-lg bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 text-obsidian font-bold hover:shadow-cyan-glow transition transform active:scale-95 flex items-center space-x-1.5">
+          <span>Get Audit</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Real-Time Metrics Ticker Banner -->
+  <div class="bg-obsidian-300/60 border-b border-white/5 py-2 px-4 overflow-hidden">
+    <div class="max-w-7xl mx-auto flex items-center justify-between text-[11px] font-mono text-gray-400 overflow-x-auto no-scrollbar space-x-6">
+      <div class="flex items-center space-x-2 whitespace-nowrap">
+        <span class="text-cyan-accent">●</span>
+        <span class="text-gray-300 font-medium">HRV BASELINE:</span>
+        <span class="text-white font-semibold">88 ms (Top 3%)</span>
+      </div>
+      <div class="flex items-center space-x-2 whitespace-nowrap">
+        <span class="text-blue-electric">●</span>
+        <span class="text-gray-300 font-medium">CORTISOL CLEARANCE:</span>
+        <span class="text-white font-semibold">09:15 EST</span>
+      </div>
+      <div class="flex items-center space-x-2 whitespace-nowrap">
+        <span class="text-emerald-400">●</span>
+        <span class="text-gray-300 font-medium">SLEEP EFFICIENCY:</span>
+        <span class="text-white font-semibold">92.4%</span>
+      </div>
+      <div class="flex items-center space-x-2 whitespace-nowrap">
+        <span class="text-cyan-accent">●</span>
+        <span class="text-gray-300 font-medium">ADENOSINE COOLDOWN:</span>
+        <span class="text-white font-semibold">OPTIMAL (14h Half-Life)</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <!-- HERO SECTION -->
+    <section class="relative pt-10 pb-16 md:pt-16 md:pb-24 overflow-hidden">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        
+        <!-- Official Gold Logo Emblem -->
+        <div class="flex justify-center mb-6">
+          <div class="relative group cursor-pointer">
+            <div class="absolute -inset-1.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 rounded-full blur-md opacity-50 group-hover:opacity-85 transition duration-500 animate-pulse"></div>
+            <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-obsidian-400 border-2 border-amber-500/70 p-1 shadow-[0_0_30px_rgba(245,158,11,0.4)] flex items-center justify-center overflow-hidden">
+              <img src="file_00000000eeac82108895630939aa4dfe.png" onerror="this.onerror=null; this.src='img_onyx_gold_logo.jpg';" alt="ONYX Systems Logo" class="w-full h-full object-cover rounded-full group-hover:scale-105 transition-transform duration-300" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Pill -->
+        <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-obsidian-300 border border-amber-500/30 text-xs font-mono mb-8">
+          <span class="w-2 h-2 rounded-full bg-cyan-accent animate-ping"></span>
+          <span class="text-cyan-accent font-semibold tracking-wide uppercase">Engineered for Founders & Technical Leaders</span>
+        </div>
+
+        <!-- Main Headline -->
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight mb-6">
+          Precision Metabolic Telemetry & <span class="bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 bg-clip-text text-transparent">Performance Auditing</span>
+        </h1>
+
+        <!-- Subheadline -->
+        <p class="text-base sm:text-lg lg:text-xl text-gray-300 max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
+          Eliminate afternoon brain fog, optimize sleep architecture, and balance daily energy through data-driven physiological audits.
+        </p>
+
+        <!-- CTA Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 mb-14">
+          <button onclick="openCommunityModal()" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-obsidian-300 hover:bg-obsidian-200 border border-cyan-accent/50 text-white font-bold text-base flex items-center justify-center space-x-3 transition group hover:border-cyan-accent shadow-inner-glow">
+            <i data-lucide="shield-check" class="w-5 h-5 text-cyan-accent group-hover:scale-110 transition"></i>
+            <span>Join Free Community</span>
+          </button>
+
+          <a href="#audit-intake" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 text-obsidian font-extrabold text-base flex items-center justify-center space-x-3 hover:shadow-cyan-glow transition transform active:scale-98">
+            <i data-lucide="zap" class="w-5 h-5 fill-obsidian"></i>
+            <span>Request 48-Hour Audit</span>
+          </a>
+        </div>
+
+        <!-- Trust Badges & Telemetry Integration -->
+        <div class="pt-6 border-t border-white/5">
+          <p class="text-xs uppercase font-mono tracking-widest text-gray-400 mb-4">Integrates Seamlessly With Biometric Hardware</p>
+          <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-gray-400 text-xs sm:text-sm font-mono">
+            <div class="flex items-center space-x-2 bg-obsidian-300/40 px-3 py-1.5 rounded border border-white/5">
+              <i data-lucide="watch" class="w-4 h-4 text-cyan-accent"></i>
+              <span>OURA GEN 3/4</span>
+            </div>
+            <div class="flex items-center space-x-2 bg-obsidian-300/40 px-3 py-1.5 rounded border border-white/5">
+              <i data-lucide="activity" class="w-4 h-4 text-blue-electric"></i>
+              <span>WHOOP 4.0</span>
+            </div>
+            <div class="flex items-center space-x-2 bg-obsidian-300/40 px-3 py-1.5 rounded border border-white/5">
+              <i data-lucide="heart-pulse" class="w-4 h-4 text-cyan-accent"></i>
+              <span>APPLE HEALTHKIT</span>
+            </div>
+            <div class="flex items-center space-x-2 bg-obsidian-300/40 px-3 py-1.5 rounded border border-white/5">
+              <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i>
+              <span>CONTINUOUS GLUCOSE (CGM)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 2: INTERACTIVE DEMO / TELEMETRY DASHBOARD PREVIEW -->
+    <section id="simulator" class="py-14 sm:py-20 bg-obsidian-400/60 border-y border-white/5 relative">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center max-w-3xl mx-auto mb-12">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-dim border border-cyan-accent/30 text-xs font-mono text-cyan-accent mb-3">
+            <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+            <span>Interactive Simulator</span>
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white mb-3">
+            Live Metabolic Audit Simulator
+          </h2>
+          <p class="text-sm sm:text-base text-gray-400">
+            Simulate how your caffeine intake timing and dosage alters your circadian adenosine accumulation and creates the 2:30 PM executive crash.
+          </p>
+        </div>
+
+        <!-- Main Simulator Card -->
+        <div class="bg-obsidian-300 rounded-2xl border border-white/10 p-6 sm:p-8 lg:p-10 shadow-2xl relative overflow-hidden telemetry-glow-cyan">
+          
+          <!-- Top Bar with status & simulation toggle -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-8 border-b border-white/10 gap-4">
+            <div>
+              <div class="flex items-center space-x-3">
+                <span class="h-3 w-3 rounded-full bg-cyan-accent animate-pulse"></span>
+                <h3 class="text-lg sm:text-xl font-bold text-white">Physiological Telemetry Engine</h3>
+              </div>
+              <p class="text-xs text-gray-400 font-mono mt-1">SIMULATION MODEL: ADENOSINE RECEPTOR ANTAGONISM (24-HR CYCLE)</p>
+            </div>
+
+            <!-- Quick Preset Buttons -->
+            <div class="flex items-center space-x-2 bg-obsidian-200 p-1.5 rounded-xl border border-white/5 text-xs font-medium">
+              <span class="text-gray-400 px-2 font-mono text-[11px]">PRESETS:</span>
+              <button onclick="applyPreset('founder')" class="px-3 py-1 rounded-lg bg-obsidian-100 hover:bg-cyan-accent/20 hover:text-cyan-accent text-gray-300 transition text-xs font-mono active:scale-95">
+                Late Founder (2 PM)
+              </button>
+              <button onclick="applyPreset('optimal')" class="px-3 py-1 rounded-lg bg-cyan-dim text-cyan-accent border border-cyan-accent/30 text-xs font-mono font-bold transition active:scale-95">
+                Optimal Delay (9:30 AM)
+              </button>
+              <button onclick="applyPreset('exhausted')" class="px-3 py-1 rounded-lg bg-obsidian-100 hover:bg-red-500/20 hover:text-red-400 text-gray-300 transition text-xs font-mono active:scale-95">
+                Sleep-Deprived
+              </button>
+            </div>
+          </div>
+
+          <!-- Grid: Controls vs Real-time telemetry dashboard -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left 5 Columns: Interactive Controls -->
+            <div class="lg:col-span-5 space-y-6">
+              
+              <!-- Control 1: Caffeine Timing -->
+              <div class="bg-obsidian-200/90 p-5 rounded-xl border border-white/5">
+                <div class="flex justify-between items-center mb-3">
+                  <label class="text-xs sm:text-sm font-semibold text-gray-200 flex items-center space-x-2">
+                    <i data-lucide="clock" class="w-4 h-4 text-cyan-accent"></i>
+                    <span>Caffeine Intake Timing</span>
+                  </label>
+                  <span id="caffeine-time-display" class="font-mono text-cyan-accent font-bold text-sm bg-obsidian-100 px-2 py-0.5 rounded border border-cyan-accent/30">
+                    08:00 AM
+                  </span>
+                </div>
+                
+                <input 
+                  type="range" 
+                  id="caffeine-time-slider" 
+                  min="6" 
+                  max="18" 
+                  step="0.5" 
+                  value="8" 
+                  class="w-full accent-cyan-accent cursor-pointer" 
+                  oninput="updateSimulation()"
+                />
+                
+                <div class="flex justify-between text-[10px] font-mono text-gray-400 mt-2">
+                  <span>06:00 AM (Immediate)</span>
+                  <span>12:00 PM (Noon)</span>
+                  <span>06:00 PM (Late)</span>
+                </div>
+              </div>
+
+              <!-- Control 2: Dosage (mg) -->
+              <div class="bg-obsidian-200/90 p-5 rounded-xl border border-white/5">
+                <div class="flex justify-between items-center mb-3">
+                  <label class="text-xs sm:text-sm font-semibold text-gray-200 flex items-center space-x-2">
+                    <i data-lucide="coffee" class="w-4 h-4 text-blue-electric"></i>
+                    <span>Caffeine Dosage</span>
+                  </label>
+                  <span id="caffeine-dose-display" class="font-mono text-blue-electric font-bold text-sm bg-obsidian-100 px-2 py-0.5 rounded border border-blue-electric/30">
+                    200 mg (Double Espresso)
+                  </span>
+                </div>
+                
+                <div class="grid grid-cols-4 gap-2">
+                  <button onclick="setDosage(100)" class="dose-btn py-2 px-1 text-center rounded-lg border border-white/10 bg-obsidian-100 hover:border-cyan-accent text-xs font-mono transition" data-dose="100">
+                    100 mg
+                  </button>
+                  <button onclick="setDosage(200)" class="dose-btn active-dose py-2 px-1 text-center rounded-lg border border-cyan-accent bg-cyan-dim text-cyan-accent font-bold text-xs font-mono transition" data-dose="200">
+                    200 mg
+                  </button>
+                  <button onclick="setDosage(300)" class="dose-btn py-2 px-1 text-center rounded-lg border border-white/10 bg-obsidian-100 hover:border-cyan-accent text-xs font-mono transition" data-dose="300">
+                    300 mg
+                  </button>
+                  <button onclick="setDosage(400)" class="dose-btn py-2 px-1 text-center rounded-lg border border-white/10 bg-obsidian-100 hover:border-cyan-accent text-xs font-mono transition" data-dose="400">
+                    400 mg+
+                  </button>
+                </div>
+              </div>
+
+              <!-- Control 3: Sleep Architecture Baseline -->
+              <div class="bg-obsidian-200/90 p-5 rounded-xl border border-white/5">
+                <div class="flex justify-between items-center mb-2">
+                  <label class="text-xs sm:text-sm font-semibold text-gray-200 flex items-center space-x-2">
+                    <i data-lucide="moon" class="w-4 h-4 text-indigo-400"></i>
+                    <span>Prior Night Rest Duration</span>
+                  </label>
+                  <span id="sleep-hrs-display" class="font-mono text-white font-bold text-sm">
+                    7.5 Hours
+                  </span>
+                </div>
+                
+                <input 
+                  type="range" 
+                  id="sleep-hrs-slider" 
+                  min="4.5" 
+                  max="9.0" 
+                  step="0.5" 
+                  value="7.5" 
+                  class="w-full accent-blue-electric cursor-pointer" 
+                  oninput="updateSimulation()"
+                />
+                
+                <div class="flex justify-between text-[10px] font-mono text-gray-400 mt-2">
+                  <span class="text-red-400">4.5h (High Debt)</span>
+                  <span>7.0h (Average)</span>
+                  <span class="text-emerald-400">9.0h (Fully Primed)</span>
+                </div>
+              </div>
+
+              <!-- Key Diagnostic Takeaway -->
+              <div id="sim-diagnosis-box" class="p-4 rounded-xl border bg-cyan-dim/20 border-cyan-accent/30 text-xs font-mono">
+                <div class="flex items-center space-x-2 text-cyan-accent font-bold mb-1">
+                  <i data-lucide="info" class="w-4 h-4"></i>
+                  <span>AUDIT DIAGNOSIS</span>
+                </div>
+                <p id="sim-diagnosis-text" class="text-gray-300 leading-relaxed">
+                  Morning dose at 08:00 AM clears 82% of adenosine receptors before 10:00 PM sleep onset. Afternoon energy curve remains stable with low crash index.
+                </p>
+              </div>
+
+            </div>
+
+            <!-- Right 7 Columns: Real-Time Telemetry Dashboard Preview -->
+            <div class="lg:col-span-7 space-y-6">
+              
+              <!-- Top Metrics Cards Trio -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                
+                <!-- Meter 1: Crash Risk Level -->
+                <div class="bg-obsidian-200 p-4 rounded-xl border border-white/5 relative overflow-hidden">
+                  <div class="text-[11px] font-mono text-gray-400 uppercase tracking-wider mb-1">Crash Risk Level</div>
+                  <div class="flex items-baseline space-x-2">
+                    <span id="metric-crash-level" class="text-2xl font-extrabold text-cyan-accent">LOW</span>
+                    <span id="metric-crash-val" class="text-xs font-mono text-gray-400">18%</span>
+                  </div>
+                  <!-- Mini progress bar -->
+                  <div class="w-full bg-obsidian-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                    <div id="meter-crash-bar" class="h-full bg-cyan-accent transition-all duration-300" style="width: 18%;"></div>
+                  </div>
+                  <span id="metric-crash-time" class="text-[10px] font-mono text-gray-400 mt-1.5 block">Estimated Dip: 15:45</span>
+                </div>
+
+                <!-- Meter 2: Optimized Recovery % -->
+                <div class="bg-obsidian-200 p-4 rounded-xl border border-white/5 relative overflow-hidden">
+                  <div class="text-[11px] font-mono text-gray-400 uppercase tracking-wider mb-1">Optimized Recovery</div>
+                  <div class="flex items-baseline space-x-2">
+                    <span id="metric-recovery-val" class="text-2xl font-extrabold text-emerald-400">92%</span>
+                    <span class="text-xs font-mono text-emerald-400/80">SCORE</span>
+                  </div>
+                  <div class="w-full bg-obsidian-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                    <div id="meter-recovery-bar" class="h-full bg-emerald-400 transition-all duration-300" style="width: 92%;"></div>
+                  </div>
+                  <span id="metric-deep-sleep" class="text-[10px] font-mono text-gray-400 mt-1.5 block">Deep Sleep Pred: +1.8h</span>
+                </div>
+
+                <!-- Meter 3: Adenosine / Caffeine Curve Indicator -->
+                <div class="bg-obsidian-200 p-4 rounded-xl border border-white/5 relative overflow-hidden">
+                  <div class="text-[11px] font-mono text-gray-400 uppercase tracking-wider mb-1">HRV Impact Score</div>
+                  <div class="flex items-baseline space-x-2">
+                    <span id="metric-hrv-val" class="text-2xl font-extrabold text-blue-electric">+14 ms</span>
+                    <span class="text-xs font-mono text-gray-400">VS BASE</span>
+                  </div>
+                  <div class="w-full bg-obsidian-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                    <div id="meter-hrv-bar" class="h-full bg-blue-electric transition-all duration-300" style="width: 85%;"></div>
+                  </div>
+                  <span id="metric-sleep-latency" class="text-[10px] font-mono text-gray-400 mt-1.5 block">Latency: 12 min</span>
+                </div>
+
+              </div>
+
+              <!-- Main Visual Meter / Dynamic Telemetry Graph -->
+              <div class="bg-obsidian-200 p-5 sm:p-6 rounded-xl border border-white/10">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-4 border-b border-white/5 gap-2">
+                  <div class="flex items-center space-x-2">
+                    <i data-lucide="line-chart" class="w-4 h-4 text-cyan-accent"></i>
+                    <span class="text-sm font-bold text-white">24-Hour Circadian Energy & Adenosine Trajectory</span>
+                  </div>
+                  <div class="flex items-center space-x-4 text-[11px] font-mono">
+                    <span class="flex items-center space-x-1.5">
+                      <span class="w-2.5 h-2.5 rounded-full bg-cyan-accent inline-block"></span>
+                      <span class="text-gray-300">Energy Stability</span>
+                    </span>
+                    <span class="flex items-center space-x-1.5">
+                      <span class="w-2.5 h-2.5 rounded-full bg-blue-electric inline-block"></span>
+                      <span class="text-gray-300">Caffeine Active</span>
+                    </span>
+                    <span class="flex items-center space-x-1.5">
+                      <span class="w-2.5 h-2.5 rounded-full bg-purple-400 inline-block"></span>
+                      <span class="text-gray-300">Adenosine Pressure</span>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- SVG Graph with dynamic curve updates -->
+                <div class="relative w-full h-48 sm:h-56 bg-obsidian-100/70 rounded-lg p-2 flex items-center justify-center overflow-hidden border border-white/5">
+                  <svg id="telemetry-svg" class="w-full h-full" viewBox="0 0 500 180" preserveAspectRatio="none">
+                    <!-- Subtle grid lines -->
+                    <line x1="0" y1="45" x2="500" y2="45" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3,3" />
+                    <line x1="0" y1="90" x2="500" y2="90" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3,3" />
+                    <line x1="0" y1="135" x2="500" y2="135" stroke="rgba(255,255,255,0.05)" stroke-dasharray="3,3" />
+                    
+                    <!-- Time vertical markers -->
+                    <line x1="125" y1="0" x2="125" y2="180" stroke="rgba(255,255,255,0.04)" />
+                    <line x1="250" y1="0" x2="250" y2="180" stroke="rgba(255,255,255,0.04)" />
+                    <line x1="375" y1="0" x2="375" y2="180" stroke="rgba(255,255,255,0.04)" />
+
+                    <!-- Dynamic SVG Paths -->
+                    <!-- Adenosine Pressure Curve (Purple) -->
+                    <path id="path-adenosine" d="M 0,160 Q 150,140 250,90 T 500,20" fill="none" stroke="#C084FC" stroke-width="2" stroke-dasharray="4,4" opacity="0.75" />
+                    
+                    <!-- Caffeine Active Serum (Blue area & stroke) -->
+                    <path id="path-caffeine" d="M 0,170 L 60,170 Q 110,40 160,50 Q 280,100 450,165 L 500,170" fill="none" stroke="#D97706" stroke-width="2.5" />
+
+                    <!-- Energy Stability Result (Cyan glowing line) -->
+                    <path id="path-energy" d="M 0,130 Q 80,70 180,45 Q 270,60 350,110 Q 430,130 500,160" fill="none" stroke="#F59E0B" stroke-width="3" filter="drop-shadow(0 0 8px rgba(245,158,11,0.65))" />
+                    
+                    <!-- Critical crash marker pinpoint -->
+                    <g id="crash-pinpoint" transform="translate(320, 105)">
+                      <circle r="5" fill="#F59E0B" class="animate-ping opacity-75" />
+                      <circle r="4" fill="#F59E0B" stroke="#090A0F" stroke-width="1.5" />
+                      <text x="8" y="4" fill="#F59E0B" font-size="9" font-family="JetBrains Mono" font-weight="bold">OPTIMAL SUSTAIN</text>
+                    </g>
+                  </svg>
+
+                  <!-- Time axis labels -->
+                  <div class="absolute bottom-1 left-3 right-3 flex justify-between text-[10px] font-mono text-gray-500 pointer-events-none">
+                    <span>06:00</span>
+                    <span>10:00</span>
+                    <span>14:00 (Crash Zone)</span>
+                    <span>18:00</span>
+                    <span>22:00</span>
+                    <span>02:00</span>
+                  </div>
+                </div>
+
+                <!-- Live Analysis Status Ribbon -->
+                <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-gray-300">
+                  <div class="flex items-center space-x-2">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-cyan-accent"></i>
+                    <span>METABOLIC STATUS:</span>
+                    <span id="sim-status-badge" class="text-cyan-accent font-bold">ALIGNED WITH CIRCADIAN GATEWAY</span>
+                  </div>
+                  <div class="flex items-center space-x-2 text-gray-400">
+                    <span>SLEEP ARCHITECTURE IMPACT:</span>
+                    <span id="sim-sleep-badge" class="text-emerald-400 font-bold">+24% REM PHASE</span>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 3: CORE OFFERINGS (CARDS) -->
+    <section id="offerings" class="py-16 sm:py-24 bg-obsidian-500 relative">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-electric/30 text-xs font-mono text-blue-electric mb-3">
+            <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+            <span>Architecture & Protocols</span>
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-4">
+            System Tiers & Access Levels
+          </h2>
+          <p class="text-base text-gray-400">
+            Choose between self-directed community intelligence or a comprehensive 48-hour biometric telemetry audit.
+          </p>
+        </div>
+
+        <!-- 2 Core Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 items-stretch">
+          
+          <!-- Card 1: Free Community Hub -->
+          <div class="bg-obsidian-300/80 rounded-2xl border border-white/10 p-8 flex flex-col justify-between hover:border-white/20 transition group relative overflow-hidden">
+            <div>
+              <div class="flex items-center justify-between mb-6">
+                <div class="w-12 h-12 rounded-xl bg-obsidian-100 border border-white/10 flex items-center justify-center text-gray-300 group-hover:text-cyan-accent group-hover:border-cyan-accent transition">
+                  <i data-lucide="message-square-code" class="w-6 h-6"></i>
+                </div>
+                <span class="font-mono text-xs text-gray-400 px-3 py-1 rounded-full bg-obsidian-200 border border-white/5">OPEN ACCESS</span>
+              </div>
+
+              <h3 class="text-2xl font-bold text-white mb-2">Free Community Hub</h3>
+              <p class="text-sm text-gray-400 mb-6 leading-relaxed">
+                Connect with high-output founders, developers, and operators sharing peer-reviewed bio-stacks, telemetry breakdowns, and open-source protocol drops.
+              </p>
+
+              <div class="space-y-4 mb-8">
+                <div class="flex items-start space-x-3">
+                  <div class="w-5 h-5 rounded-full bg-cyan-dim flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="check" class="w-3 h-3 text-cyan-accent"></i>
+                  </div>
+                  <span class="text-sm text-gray-300">Bi-Weekly Protocol Drops & Supplement Timing Stacks</span>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <div class="w-5 h-5 rounded-full bg-cyan-dim flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="check" class="w-3 h-3 text-cyan-accent"></i>
+                  </div>
+                  <span class="text-sm text-gray-300">Weekly Micro-Teardowns of executive wearable telemetry</span>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <div class="w-5 h-5 rounded-full bg-cyan-dim flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="check" class="w-3 h-3 text-cyan-accent"></i>
+                  </div>
+                  <span class="text-sm text-gray-300">Direct Community Q&A with metabolic performance researchers</span>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <div class="w-5 h-5 rounded-full bg-cyan-dim flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="check" class="w-3 h-3 text-cyan-accent"></i>
+                  </div>
+                  <span class="text-sm text-gray-300">Access to ONYX Open Telemetry Notion Vault & Sleep Calculator</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="pt-6 border-t border-white/5 flex items-baseline mb-6">
+                <span class="text-3xl font-extrabold text-white">$0</span>
+                <span class="text-gray-400 text-sm ml-2 font-mono">/ Forever Free</span>
+              </div>
+              <button onclick="openCommunityModal()" class="w-full py-3.5 px-4 rounded-xl bg-obsidian-200 hover:bg-obsidian-100 border border-white/10 hover:border-cyan-accent/50 text-white font-bold text-sm flex items-center justify-center space-x-2 transition group-hover:shadow-inner-glow">
+                <span>Access Free Community</span>
+                <i data-lucide="external-link" class="w-4 h-4 text-cyan-accent"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 2: 48-Hour Metabolic Audit ($87/mo) -->
+          <div class="bg-obsidian-300 rounded-2xl border-2 border-cyan-accent/70 p-8 flex flex-col justify-between shadow-cyan-glow relative overflow-hidden">
+            <!-- Popular Glow Badge -->
+            <div class="absolute top-0 right-0">
+              <div class="bg-gradient-to-l from-amber-400 via-yellow-400 to-amber-600 text-obsidian font-extrabold text-[10px] font-mono tracking-widest px-4 py-1.5 rounded-bl-xl uppercase shadow-md">
+                FOUNDERS TIER • 48-HR TURNAROUND
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-6">
+                <div class="w-12 h-12 rounded-xl bg-cyan-dim border border-cyan-accent/40 flex items-center justify-center text-cyan-accent">
+                  <i data-lucide="fingerprint" class="w-6 h-6"></i>
+                </div>
+              </div>
+
+              <h3 class="text-2xl font-bold text-white mb-2 flex items-center space-x-2">
+                <span>48-Hour Metabolic Audit</span>
+              </h3>
+              <p class="text-sm text-gray-300 mb-6 leading-relaxed">
+                Full-spectrum continuous physiological telemetry audit. We ingest your wearable raw data, diagnose metabolic drag, and deliver your exact blueprint.
+              </p>
+
+              <div class="space-y-4 mb-8">
+                <div class="flex items-start space-x-3">
+                  <div class="w-5 h-5 rounded-full bg-cyan-accent flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="check" class="w-3 h-3 text-obsidian stroke-[3]"></i>
+                  </div>
+                  <span class="text-sm text-white font-medium">Personalized Continuous Telemetry & Baseline Modeling</span>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <div class="w-5 h-5 rounded-full bg-cyan-accent flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="check" class="w-3 h-3 text-obsidian stroke-[3]"></i>
+                  </div>
+                  <span class="text-sm text-white font-medium">Sleep Architecture & HRV Autonomic Recovery Deep-Dive</span>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <div class="w-5 h-5 rounded-full bg-cyan-accent flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="check" class="w-3 h-3 text-obsidian stroke-[3]"></i>
+                  </div>
+                  <span class="text-sm text-white font-medium">Custom 1-on-1 Performance Action Plan & Supplement Protocol</span>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <div class="w-5 h-5 rounded-full bg-cyan-accent flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i data-lucide="check" class="w-3 h-3 text-obsidian stroke-[3]"></i>
+                  </div>
+                  <span class="text-sm text-white font-medium">Direct Async Access to Dedicated Metabolic Performance Lead</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="pt-6 border-t border-white/10 flex items-baseline justify-between mb-6">
+                <div>
+                  <span class="text-4xl font-extrabold text-white">$87</span>
+                  <span class="text-cyan-accent text-sm ml-1 font-mono font-semibold">/ month</span>
+                </div>
+                <span class="text-xs font-mono text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded border border-emerald-500/30">
+                  SLOTS LIMITED (5/WEEK)
+                </span>
+              </div>
+              <a href="#audit-intake" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 text-obsidian font-extrabold text-sm flex items-center justify-center space-x-2 hover:shadow-cyan-glow transition transform active:scale-98">
+                <span>Request Your 48-Hour Audit</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 4: INTERACTIVE AUDIT REQUEST FORM (MULTI-STEP) -->
+    <section id="audit-intake" class="py-16 sm:py-24 bg-obsidian-400/80 border-t border-white/5 relative">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center mb-12">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-dim border border-cyan-accent/30 text-xs font-mono text-cyan-accent mb-3">
+            <i data-lucide="clipboard-check" class="w-3.5 h-3.5"></i>
+            <span>Intake Protocol</span>
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white mb-3">
+            Reserve Your 48-Hour Audit
+          </h2>
+          <p class="text-sm sm:text-base text-gray-400">
+            Complete the 3-step intake preview to calibrate your telemetry profile and unlock your performance audit slot.
+          </p>
+        </div>
+
+        <!-- Intake Form Container -->
+        <div class="bg-obsidian-300 rounded-2xl border border-white/10 p-6 sm:p-10 shadow-2xl relative">
+          
+          <!-- Progress Stepper Header -->
+          <div class="mb-8">
+            <div class="flex items-center justify-between text-xs font-mono mb-3">
+              <span id="step-indicator-text" class="text-cyan-accent font-bold">STEP 1 OF 3: PRIMARY GOAL</span>
+              <span id="step-percentage" class="text-gray-400">33% COMPLETE</span>
+            </div>
+            <div class="w-full bg-obsidian-100 h-2 rounded-full overflow-hidden">
+              <div id="form-progress-bar" class="h-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 transition-all duration-300 w-1/3"></div>
+            </div>
+          </div>
+
+          <!-- The Form -->
+          <form id="audit-form" onsubmit="handleFormSubmit(event)">
+            
+            <!-- STEP 1: Primary Goal -->
+            <div id="form-step-1" class="step-content space-y-6">
+              <div>
+                <h4 class="text-lg font-bold text-white mb-1">What is your primary physiological bottleneck?</h4>
+                <p class="text-xs sm:text-sm text-gray-400">We tailor the telemetry analysis to target your specific executive demand.</p>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <label class="cursor-pointer">
+                  <input type="radio" name="primaryGoal" value="Energy" class="peer sr-only" checked />
+                  <div class="p-4 rounded-xl border border-white/10 bg-obsidian-200 peer-checked:border-cyan-accent peer-checked:bg-cyan-dim/20 peer-checked:shadow-cyan-sm transition text-center flex flex-col items-center justify-center space-y-2 h-full">
+                    <i data-lucide="zap" class="w-6 h-6 text-cyan-accent"></i>
+                    <span class="text-sm font-bold text-white">Daily Energy</span>
+                    <span class="text-[11px] text-gray-400">Kill afternoon fog & crashes</span>
+                  </div>
+                </label>
+
+                <label class="cursor-pointer">
+                  <input type="radio" name="primaryGoal" value="Sleep" class="peer sr-only" />
+                  <div class="p-4 rounded-xl border border-white/10 bg-obsidian-200 peer-checked:border-cyan-accent peer-checked:bg-cyan-dim/20 peer-checked:shadow-cyan-sm transition text-center flex flex-col items-center justify-center space-y-2 h-full">
+                    <i data-lucide="moon" class="w-6 h-6 text-blue-electric"></i>
+                    <span class="text-sm font-bold text-white">Sleep Architecture</span>
+                    <span class="text-[11px] text-gray-400">Maximize deep / REM phases</span>
+                  </div>
+                </label>
+
+                <label class="cursor-pointer">
+                  <input type="radio" name="primaryGoal" value="Focus" class="peer sr-only" />
+                  <div class="p-4 rounded-xl border border-white/10 bg-obsidian-200 peer-checked:border-cyan-accent peer-checked:bg-cyan-dim/20 peer-checked:shadow-cyan-sm transition text-center flex flex-col items-center justify-center space-y-2 h-full">
+                    <i data-lucide="brain" class="w-6 h-6 text-purple-400"></i>
+                    <span class="text-sm font-bold text-white">Executive Focus</span>
+                    <span class="text-[11px] text-gray-400">Cognitive stamina & HRV flow</span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="pt-4 flex justify-end">
+                <button type="button" onclick="goToStep(2)" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 text-obsidian font-bold text-sm flex items-center space-x-2 hover:shadow-cyan-glow transition">
+                  <span>Continue to Wearable</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 2: Current Wearable -->
+            <div id="form-step-2" class="step-content space-y-6 hidden">
+              <div>
+                <h4 class="text-lg font-bold text-white mb-1">Which biometric device do you currently wear?</h4>
+                <p class="text-xs sm:text-sm text-gray-400">We support automatic raw API sync or export file ingestion.</p>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <label class="cursor-pointer">
+                  <input type="radio" name="wearable" value="Oura" class="peer sr-only" checked />
+                  <div class="p-4 rounded-xl border border-white/10 bg-obsidian-200 peer-checked:border-cyan-accent peer-checked:bg-cyan-dim/20 peer-checked:shadow-cyan-sm transition text-center flex flex-col items-center justify-center space-y-2 h-full">
+                    <i data-lucide="circle-dot" class="w-6 h-6 text-cyan-accent"></i>
+                    <span class="text-xs sm:text-sm font-bold text-white">Oura Ring</span>
+                    <span class="text-[10px] text-gray-400">Gen 2 / 3 / 4</span>
+                  </div>
+                </label>
+
+                <label class="cursor-pointer">
+                  <input type="radio" name="wearable" value="Whoop" class="peer sr-only" />
+                  <div class="p-4 rounded-xl border border-white/10 bg-obsidian-200 peer-checked:border-cyan-accent peer-checked:bg-cyan-dim/20 peer-checked:shadow-cyan-sm transition text-center flex flex-col items-center justify-center space-y-2 h-full">
+                    <i data-lucide="activity" class="w-6 h-6 text-blue-electric"></i>
+                    <span class="text-xs sm:text-sm font-bold text-white">Whoop</span>
+                    <span class="text-[10px] text-gray-400">4.0 Sensor</span>
+                  </div>
+                </label>
+
+                <label class="cursor-pointer">
+                  <input type="radio" name="wearable" value="Apple Watch" class="peer sr-only" />
+                  <div class="p-4 rounded-xl border border-white/10 bg-obsidian-200 peer-checked:border-cyan-accent peer-checked:bg-cyan-dim/20 peer-checked:shadow-cyan-sm transition text-center flex flex-col items-center justify-center space-y-2 h-full">
+                    <i data-lucide="watch" class="w-6 h-6 text-emerald-400"></i>
+                    <span class="text-xs sm:text-sm font-bold text-white">Apple Watch</span>
+                    <span class="text-[10px] text-gray-400">Ultra / Series 7+</span>
+                  </div>
+                </label>
+
+                <label class="cursor-pointer">
+                  <input type="radio" name="wearable" value="None" class="peer sr-only" />
+                  <div class="p-4 rounded-xl border border-white/10 bg-obsidian-200 peer-checked:border-cyan-accent peer-checked:bg-cyan-dim/20 peer-checked:shadow-cyan-sm transition text-center flex flex-col items-center justify-center space-y-2 h-full">
+                    <i data-lucide="help-circle" class="w-6 h-6 text-gray-400"></i>
+                    <span class="text-xs sm:text-sm font-bold text-white">None / Other</span>
+                    <span class="text-[10px] text-gray-400">Manual Intake</span>
+                  </div>
+                </label>
+              </div>
+
+              <div class="pt-4 flex justify-between items-center">
+                <button type="button" onclick="goToStep(1)" class="px-5 py-2.5 rounded-xl border border-white/10 text-gray-300 hover:text-white font-medium text-xs font-mono transition">
+                  ← Back
+                </button>
+                <button type="button" onclick="goToStep(3)" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 text-obsidian font-bold text-sm flex items-center space-x-2 hover:shadow-cyan-glow transition">
+                  <span>Continue to Intake</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 3: Daily Caffeine & Verification -->
+            <div id="form-step-3" class="step-content space-y-6 hidden">
+              <div>
+                <h4 class="text-lg font-bold text-white mb-1">Caffeine Habits & Executive Contact</h4>
+                <p class="text-xs sm:text-sm text-gray-400">Provide your baseline so our telemetry team can prepare your model.</p>
+              </div>
+
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-mono text-gray-300 uppercase mb-2">Daily Caffeine Intake</label>
+                  <select name="caffeineIntake" class="w-full bg-obsidian-200 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyan-accent">
+                    <option value="1 cup (approx 100mg)">1 cup morning (approx 100mg)</option>
+                    <option value="2-3 cups (200-300mg)" selected>2–3 cups throughout day (200–300mg)</option>
+                    <option value="4+ cups (400mg+)">Heavy: 4+ cups / Pre-workout (400mg+)</option>
+                    <option value="Zero Caffeine">Zero Caffeine (Pure Circadian Focus)</option>
+                  </select>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-2">Full Name</label>
+                    <input type="text" name="userName" required placeholder="e.g. Alex Vance" class="w-full bg-obsidian-200 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-accent" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-mono text-gray-300 uppercase mb-2">Work Email (Confidential)</label>
+                    <input type="email" name="userEmail" required placeholder="alex@company.com" class="w-full bg-obsidian-200 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-accent" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-4 flex justify-between items-center">
+                <button type="button" onclick="goToStep(2)" class="px-5 py-2.5 rounded-xl border border-white/10 text-gray-300 hover:text-white font-medium text-xs font-mono transition">
+                  ← Back
+                </button>
+                <button type="submit" id="submit-btn" class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 text-obsidian font-extrabold text-sm flex items-center space-x-2 hover:shadow-cyan-glow transition transform active:scale-95">
+                  <i data-lucide="lock" class="w-4 h-4"></i>
+                  <span>Submit & Reserve Audit Slot</span>
+                </button>
+              </div>
+            </div>
+
+          </form>
+
+          <!-- Success State (Revealed after submission) -->
+          <div id="form-success-state" class="hidden text-center py-8 space-y-6">
+            <div class="w-16 h-16 rounded-2xl bg-cyan-dim border border-cyan-accent mx-auto flex items-center justify-center text-cyan-accent shadow-cyan-glow">
+              <i data-lucide="check-circle" class="w-10 h-10"></i>
+            </div>
+
+            <div>
+              <span class="font-mono text-xs text-cyan-accent uppercase tracking-widest px-2.5 py-1 bg-cyan-dim rounded border border-cyan-accent/30 inline-block mb-2">
+                TELEMETRY ENQUEUED
+              </span>
+              <h3 class="text-2xl sm:text-3xl font-extrabold text-white mb-2">
+                Audit Slot Reserved. Proceeding to ONYX Gateway.
+              </h3>
+              <p class="text-sm text-gray-300 max-w-md mx-auto">
+                Your preliminary profile has been assigned to a Senior Metabolic Performance Auditor. Your personalized intake portal is ready.
+              </p>
+            </div>
+
+            <!-- Reservation Ticket Summary -->
+            <div class="bg-obsidian-200/90 p-5 rounded-xl border border-white/10 max-w-md mx-auto text-left font-mono text-xs space-y-2">
+              <div class="flex justify-between border-b border-white/5 pb-2">
+                <span class="text-gray-400">ASSIGNED CODE:</span>
+                <span id="ticket-code" class="text-cyan-accent font-bold">ONYX-8942-MET</span>
+              </div>
+              <div class="flex justify-between border-b border-white/5 pb-2">
+                <span class="text-gray-400">ESTIMATED DELIVERY:</span>
+                <span class="text-white">48 Hours from ingestion</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-400">AUDIT TIER:</span>
+                <span class="text-emerald-400 font-bold">$87/mo Executive Plan</span>
+              </div>
+            </div>
+
+            <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button onclick="resetIntakeForm()" class="px-5 py-3 rounded-xl border border-white/10 text-gray-400 hover:text-white text-xs font-mono transition">
+                Create Another Profile
+              </button>
+              <button onclick="openCommunityModal()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 text-obsidian font-bold text-sm flex items-center space-x-2 hover:shadow-cyan-glow transition">
+                <span>Enter ONYX Gateway Portal</span>
+                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-obsidian-500 border-t border-white/10 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        
+        <!-- Left: Brand info -->
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-full bg-obsidian-300 border border-amber-500/50 flex items-center justify-center shadow-[0_0_12px_rgba(245,158,11,0.3)] overflow-hidden p-0.5">
+            <img src="file_00000000eeac82108895630939aa4dfe.png" onerror="this.onerror=null; this.src='img_onyx_gold_logo.jpg';" alt="ONYX Systems Logo" class="w-full h-full object-cover rounded-full" />
+          </div>
+          <div>
+            <div class="font-extrabold text-white text-sm tracking-wider">ONYX Systems</div>
+            <p class="text-xs text-gray-500 font-mono">High-Performance Health Intelligence & Metabolic Telemetry</p>
+          </div>
+        </div>
+
+        <!-- Center: Social handles placeholder -->
+        <div class="flex items-center space-x-6 text-sm text-gray-400 font-mono">
+          <a href="#" class="hover:text-cyan-accent transition flex items-center space-x-1.5" title="Follow on X / Twitter">
+            <i data-lucide="twitter" class="w-4 h-4 text-cyan-accent"></i>
+            <span>@ONYXsystems</span>
+          </a>
+          <a href="#" class="hover:text-blue-electric transition flex items-center space-x-1.5" title="GitHub">
+            <i data-lucide="github" class="w-4 h-4"></i>
+            <span>onyx-telemetry</span>
+          </a>
+          <a href="#" class="hover:text-white transition flex items-center space-x-1.5" title="Whop Community">
+            <i data-lucide="network" class="w-4 h-4 text-purple-400"></i>
+            <span>Whop Hub</span>
+          </a>
+        </div>
+
+        <!-- Right: Copyright & Legal -->
+        <div class="flex flex-col sm:flex-row items-center sm:space-x-4 text-xs font-mono text-gray-400">
+          <span>&copy; <span id="year">2026</span> ONYX Systems. All rights reserved.</span>
+          <div class="flex space-x-3 mt-2 sm:mt-0">
+            <a href="#" class="hover:text-gray-300 underline">Terms</a>
+            <span>•</span>
+            <a href="#" class="hover:text-gray-300 underline">Privacy</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL: FREE COMMUNITY HUB / WHOP GATEWAY -->
+  <div id="community-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-obsidian-300 border border-cyan-accent/50 rounded-2xl max-w-lg w-full p-6 sm:p-8 relative shadow-cyan-glow animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Close button -->
+      <button onclick="closeCommunityModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white p-1 rounded-lg hover:bg-obsidian-200 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Modal Content -->
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 rounded-full bg-obsidian-300 border border-amber-500/50 flex items-center justify-center text-amber-400 mx-auto mb-3 shadow-[0_0_20px_rgba(245,158,11,0.35)] overflow-hidden p-0.5">
+          <img src="file_00000000eeac82108895630939aa4dfe.png" onerror="this.onerror=null; this.src='img_onyx_gold_logo.jpg';" alt="ONYX Systems Logo" class="w-full h-full object-cover rounded-full" />
+        </div>
+        <h3 class="text-xl font-bold text-white">Join the ONYX Executive Hub</h3>
+        <p class="text-xs sm:text-sm text-gray-400 mt-1">
+          Instant access to our private Discord, Whop community, and metabolic protocol database.
+        </p>
+      </div>
+
+      <div class="space-y-3 mb-6 font-mono text-xs text-gray-300">
+        <div class="p-3 bg-obsidian-200 rounded-lg border border-white/5 flex items-center space-x-3">
+          <i data-lucide="file-code" class="w-4 h-4 text-cyan-accent"></i>
+          <span>Curated Caffeine & Circadian Protocols</span>
+        </div>
+        <div class="p-3 bg-obsidian-200 rounded-lg border border-white/5 flex items-center space-x-3">
+          <i data-lucide="activity" class="w-4 h-4 text-blue-electric"></i>
+          <span>Weekly Oura/Whoop Telemetry Teardowns</span>
+        </div>
+        <div class="p-3 bg-obsidian-200 rounded-lg border border-white/5 flex items-center space-x-3">
+          <i data-lucide="message-circle" class="w-4 h-4 text-emerald-400"></i>
+          <span>Direct AMA Channels with Performance Leads</span>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <a href="https://whop.com" target="_blank" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 text-obsidian font-extrabold text-sm flex items-center justify-center space-x-2 hover:shadow-cyan-glow transition">
+          <span>Join Free via Whop</span>
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </a>
+        <button onclick="closeCommunityModal()" class="w-full py-2.5 px-4 rounded-xl border border-white/10 text-gray-400 hover:text-white font-medium text-xs font-mono transition">
+          Return to Dashboard
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-obsidian-200 border border-cyan-accent/60 text-white px-4 py-3 rounded-xl shadow-cyan-glow font-mono text-xs flex items-center space-x-3 transform translate-y-24 opacity-0 transition-all duration-300">
+    <i data-lucide="bell" class="w-4 h-4 text-cyan-accent"></i>
+    <span id="toast-message">Telemetry parameters calibrated.</span>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // Initialize Lucide Icons
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      updateSimulation();
+      document.getElementById('year').textContent = new Date().getFullYear();
+    });
+
+    // Simulation State
+    let simState = {
+      caffeineTime: 8.0, // 8:00 AM
+      caffeineDose: 200, // mg
+      sleepHours: 7.5,
+    };
+
+    function setDosage(mg) {
+      simState.caffeineDose = mg;
+      const display = document.getElementById('caffeine-dose-display');
+      if (mg === 100) display.textContent = '100 mg (1 Cup / Green Tea)';
+      else if (mg === 200) display.textContent = '200 mg (Double Espresso)';
+      else if (mg === 300) display.textContent = '300 mg (Cold Brew / Energy)';
+      else display.textContent = '400 mg+ (Heavy Stimulant)';
+
+      // Update button styles
+      document.querySelectorAll('.dose-btn').forEach(btn => {
+        if (parseInt(btn.dataset.dose) === mg) {
+          btn.className = 'dose-btn active-dose py-2 px-1 text-center rounded-lg border border-cyan-accent bg-cyan-dim text-cyan-accent font-bold text-xs font-mono transition';
+        } else {
+          btn.className = 'dose-btn py-2 px-1 text-center rounded-lg border border-white/10 bg-obsidian-100 hover:border-cyan-accent text-xs font-mono transition text-gray-300';
+        }
+      });
+
+      updateSimulation();
+    }
+
+    function applyPreset(type) {
+      const timeSlider = document.getElementById('caffeine-time-slider');
+      const sleepSlider = document.getElementById('sleep-hrs-slider');
+
+      if (type === 'founder') {
+        timeSlider.value = 14; // 2:00 PM
+        setDosage(300);
+        sleepSlider.value = 6.0;
+        showToast("Loaded 'Late Founder' 2:00 PM Stimulant Profile");
+      } else if (type === 'optimal') {
+        timeSlider.value = 9.5; // 9:30 AM
+        setDosage(200);
+        sleepSlider.value = 8.0;
+        showToast("Loaded 'Optimal Delay' Circadian Protocol");
+      } else if (type === 'exhausted') {
+        timeSlider.value = 7.0; // 7:00 AM
+        setDosage(400);
+        sleepSlider.value = 5.0;
+        showToast("Loaded 'Sleep-Deprived' High Adenosine Profile");
+      }
+      updateSimulation();
+    }
+
+    function updateSimulation() {
+      const timeSlider = document.getElementById('caffeine-time-slider');
+      const sleepSlider = document.getElementById('sleep-hrs-slider');
+
+      simState.caffeineTime = parseFloat(timeSlider.value);
+      simState.sleepHours = parseFloat(sleepSlider.value);
+
+      // Format time display
+      const hours = Math.floor(simState.caffeineTime);
+      const minutes = (simState.caffeineTime % 1 === 0.5) ? '30' : '00';
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours > 12 ? hours - 12 : hours;
+      document.getElementById('caffeine-time-display').textContent = `${String(displayHours).padStart(2, '0')}:${minutes} ${ampm}`;
+
+      document.getElementById('sleep-hrs-display').textContent = `${simState.sleepHours.toFixed(1)} Hours`;
+
+      // Mathematical modeling of Crash Risk and Recovery
+      // Afternoon intake (>13:00) causes residual adenosine blocking past midnight
+      const hoursPast6am = simState.caffeineTime - 6;
+      let crashRisk = 15;
+      let recovery = 94;
+      let hrvBonus = 14;
+
+      // Factors:
+      if (simState.caffeineTime < 8.5) {
+        // Taking caffeine before cortisol awakening response clears (CAR)
+        crashRisk += (8.5 - simState.caffeineTime) * 16;
+      }
+      if (simState.caffeineTime >= 12.0) {
+        // Late caffeine
+        const latePenalty = (simState.caffeineTime - 11.5) * 14;
+        crashRisk += latePenalty * 0.7;
+        recovery -= latePenalty * 1.5;
+        hrvBonus -= (simState.caffeineTime - 11.5) * 8;
+      }
+
+      // Dose impact
+      crashRisk += (simState.caffeineDose - 100) * 0.08;
+      if (simState.caffeineDose > 200 && simState.caffeineTime > 12) {
+        recovery -= 18;
+      }
+
+      // Sleep baseline impact
+      if (simState.sleepHours < 7.0) {
+        crashRisk += (7.0 - simState.sleepHours) * 22;
+        recovery -= (7.0 - simState.sleepHours) * 15;
+        hrvBonus -= (7.0 - simState.sleepHours) * 10;
+      } else {
+        recovery += (simState.sleepHours - 7.0) * 5;
+      }
+
+      // Clamp values
+      crashRisk = Math.min(Math.max(Math.round(crashRisk), 8), 98);
+      recovery = Math.min(Math.max(Math.round(recovery), 32), 99);
+      hrvBonus = Math.round(hrvBonus);
+
+      // Update UI Meters
+      const crashLevelText = document.getElementById('metric-crash-level');
+      const crashVal = document.getElementById('metric-crash-val');
+      const crashBar = document.getElementById('meter-crash-bar');
+
+      crashVal.textContent = `${crashRisk}%`;
+      crashBar.style.width = `${crashRisk}%`;
+
+      if (crashRisk < 35) {
+        crashLevelText.textContent = 'LOW';
+        crashLevelText.className = 'text-2xl font-extrabold text-cyan-accent';
+        crashBar.className = 'h-full bg-cyan-accent transition-all duration-300';
+      } else if (crashRisk < 65) {
+        crashLevelText.textContent = 'ELEVATED';
+        crashLevelText.className = 'text-2xl font-extrabold text-yellow-400';
+        crashBar.className = 'h-full bg-yellow-400 transition-all duration-300';
+      } else {
+        crashLevelText.textContent = 'CRITICAL';
+        crashLevelText.className = 'text-2xl font-extrabold text-red-500';
+        crashBar.className = 'h-full bg-red-500 transition-all duration-300';
+      }
+
+      // Recovery score
+      const recVal = document.getElementById('metric-recovery-val');
+      const recBar = document.getElementById('meter-recovery-bar');
+      recVal.textContent = `${recovery}%`;
+      recBar.style.width = `${recovery}%`;
+
+      // HRV
+      const hrvVal = document.getElementById('metric-hrv-val');
+      const hrvBar = document.getElementById('meter-hrv-bar');
+      const hrvSign = hrvBonus >= 0 ? '+' : '';
+      hrvVal.textContent = `${hrvSign}${hrvBonus} ms`;
+      hrvBar.style.width = `${Math.min(Math.max(recovery - 10, 20), 95)}%`;
+
+      // Diagnostic text & Badges
+      const diagBox = document.getElementById('sim-diagnosis-box');
+      const diagText = document.getElementById('sim-diagnosis-text');
+      const statusBadge = document.getElementById('sim-status-badge');
+      const sleepBadge = document.getElementById('sim-sleep-badge');
+
+      if (simState.caffeineTime >= 13) {
+        diagBox.className = 'p-4 rounded-xl border bg-red-500/10 border-red-500/30 text-xs font-mono';
+        diagText.innerHTML = `<span class="text-red-400 font-bold">CIRCADIAN INTERFERENCE:</span> Intake after 1:00 PM leaves ~${Math.round(simState.caffeineDose * 0.45)}mg of active stimulant during Stage 3 Slow-Wave Deep Sleep. Expect suppressed HRV recovery and severe morning adenosine rebound.`;
+        statusBadge.textContent = 'ADENOSINE ACCUMULATION TRAP';
+        statusBadge.className = 'text-red-400 font-bold';
+        sleepBadge.textContent = '-35% DEEP SLEEP LOSS';
+        sleepBadge.className = 'text-red-400 font-bold';
+      } else if (simState.caffeineTime < 8.0) {
+        diagBox.className = 'p-4 rounded-xl border bg-yellow-500/10 border-yellow-500/30 text-xs font-mono';
+        diagText.innerHTML = `<span class="text-yellow-400 font-bold">CORTISOL CONFLICT:</span> Consuming caffeine immediately on waking blunts natural cortisol spike. Adenosine is temporarily masked, guaranteeing an acute 2:30 PM energy cliff.`;
+        statusBadge.textContent = 'AFTERNOON CRASH PROBABLE (14:30)';
+        statusBadge.className = 'text-yellow-400 font-bold';
+        sleepBadge.textContent = 'MODERATE STABILITY';
+        sleepBadge.className = 'text-yellow-400 font-bold';
+      } else {
+        diagBox.className = 'p-4 rounded-xl border bg-cyan-dim/20 border-cyan-accent/30 text-xs font-mono';
+        diagText.innerHTML = `<span class="text-cyan-accent font-bold">OPTIMAL ARCHITECTURE:</span> 90-min delay allows natural adenosine clearance and cortisol peak. Sustained executive flow with 8+ hours of nighttime deep recovery.`;
+        statusBadge.textContent = 'ALIGNED WITH CIRCADIAN GATEWAY';
+        statusBadge.className = 'text-cyan-accent font-bold';
+        sleepBadge.textContent = '+28% REM & SLOW WAVE';
+        sleepBadge.className = 'text-emerald-400 font-bold';
+      }
+
+      // Dynamically recompute SVG graph points based on time slider
+      updateSvgCurves(simState.caffeineTime, simState.caffeineDose, crashRisk);
+    }
+
+    function updateSvgCurves(caffTime, dose, crashRisk) {
+      // Map 6am - 2am (20 hours total) to SVG width 0..500
+      // 6am = x:0, 2am = x:500
+      const caffeineX = Math.round(((caffTime - 6) / 20) * 500);
+      const peakY = Math.max(30, 90 - (dose / 400) * 50);
+
+      const pathCaffeine = document.getElementById('path-caffeine');
+      const pathEnergy = document.getElementById('path-energy');
+      const crashPin = document.getElementById('crash-pinpoint');
+
+      // Update caffeine serum curve
+      pathCaffeine.setAttribute('d', `M 0,170 L ${Math.max(0, caffeineX - 20)},170 Q ${caffeineX + 40},${peakY} ${caffeineX + 100},${peakY + 20} Q ${caffeineX + 220},140 500,165`);
+
+      // Update energy curve
+      if (crashRisk > 60) {
+        // Big dip around 14:00 (x=200)
+        pathEnergy.setAttribute('d', `M 0,130 Q ${caffeineX + 30},40 ${caffeineX + 90},70 Q 230,160 340,140 Q 420,120 500,165`);
+        crashPin.setAttribute('transform', 'translate(230, 155)');
+        crashPin.querySelector('text').textContent = 'ACUTE CRASH ZONE';
+        crashPin.querySelector('text').setAttribute('fill', '#EF4444');
+      } else {
+        pathEnergy.setAttribute('d', `M 0,130 Q ${caffeineX + 40},50 220,65 Q 320,85 410,120 Q 460,145 500,165`);
+        crashPin.setAttribute('transform', 'translate(320, 85)');
+        crashPin.querySelector('text').textContent = 'OPTIMAL SUSTAIN';
+        crashPin.querySelector('text').setAttribute('fill', '#F59E0B');
+      }
+    }
+
+    // Multi-Step Form Logic
+    let currentStep = 1;
+
+    function goToStep(step) {
+      currentStep = step;
+      document.getElementById('form-step-1').classList.toggle('hidden', step !== 1);
+      document.getElementById('form-step-2').classList.toggle('hidden', step !== 2);
+      document.getElementById('form-step-3').classList.toggle('hidden', step !== 3);
+
+      const indicator = document.getElementById('step-indicator-text');
+      const percent = document.getElementById('step-percentage');
+      const bar = document.getElementById('form-progress-bar');
+
+      if (step === 1) {
+        indicator.textContent = 'STEP 1 OF 3: PRIMARY GOAL';
+        percent.textContent = '33% COMPLETE';
+        bar.style.width = '33%';
+      } else if (step === 2) {
+        indicator.textContent = 'STEP 2 OF 3: WEARABLE TELEMETRY';
+        percent.textContent = '66% COMPLETE';
+        bar.style.width = '66%';
+      } else if (step === 3) {
+        indicator.textContent = 'STEP 3 OF 3: CAFFEINE & VERIFICATION';
+        percent.textContent = '100% COMPLETE';
+        bar.style.width = '100%';
+      }
+      lucide.createIcons();
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-obsidian inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span>Allocating Performance Auditor...</span>
+      `;
+      submitBtn.disabled = true;
+
+      // Simulate instantaneous bio-telemetry allocation
+      setTimeout(() => {
+        document.getElementById('audit-form').classList.add('hidden');
+        document.getElementById('form-success-state').classList.remove('hidden');
+        
+        // Random ticket code
+        const codeNum = Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('ticket-code').textContent = `ONYX-${codeNum}-MET`;
+        
+        showToast("Audit Slot Reserved. Proceeding to ONYX Gateway.");
+        lucide.createIcons();
+      }, 900);
+    }
+
+    function resetIntakeForm() {
+      document.getElementById('audit-form').reset();
+      document.getElementById('audit-form').classList.remove('hidden');
+      document.getElementById('form-success-state').classList.add('hidden');
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.innerHTML = `
+        <i data-lucide="lock" class="w-4 h-4"></i>
+        <span>Submit & Reserve Audit Slot</span>
+      `;
+      submitBtn.disabled = false;
+      goToStep(1);
+    }
+
+    // Modal Handlers
+    function openCommunityModal() {
+      const modal = document.getElementById('community-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeCommunityModal() {
+      const modal = document.getElementById('community-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Close modal on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeCommunityModal();
+    });
+
+    // Toast function
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
